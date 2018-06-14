@@ -1,0 +1,6 @@
+# text and textGrid files
+*.txt
+*.textGrid
+
+# directories
+**/
