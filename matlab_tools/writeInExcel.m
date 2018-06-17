@@ -1,10 +1,9 @@
 % This function writes in the outfile the data found in the infile
 % and sorts them according to the word it corresponds to
-
 function writeInExcel(wordlist, ...
     infile,insheet,inrangematch,inrangedata, ...
     outfile)
-% Conversts the list into characters
+% Converts the list into characters
 wordlist = char(wordlist);
 [num,match,raw] = xlsread(infile,insheet,inrangematch);
 [num2,data,rawdata] = xlsread(infile,insheet,inrangedata);
