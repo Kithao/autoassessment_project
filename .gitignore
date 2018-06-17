@@ -6,5 +6,10 @@
 *.xls
 *.xlsx
 
+# matlab
+*.asv
+/plots
+/wdist_iter100
+
 # directories
 # **/
