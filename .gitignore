@@ -8,8 +8,10 @@
 
 # matlab
 *.asv
-/plots
-/wdist_iter100
+main.asv
+writeInExcel.asv
+plots/
+wdist_iter100/
 
 # directories
 # **/
