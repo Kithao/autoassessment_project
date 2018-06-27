@@ -1,15 +1,11 @@
 #!/usr/bin/python
 #
 # 13 June 2018
-# This script generates a text file with 25 sections of durations
+# This script generates a text file with 25 durations features
+# Each TextGrid ifle is parsed and vowel durations are extracted
 # 
-# If the segment is a vowel, extract its duration
-# One utterance has 25 fields of each parameter (segment nature, duration)
-#
 # Author: TRUONG Quy Thao
 #
-#
-# Note : Run this script in the directory where the TextGrid are located
 #
 
 from __future__ import with_statement
@@ -73,13 +69,18 @@ def parseTextgrid(_textgridFilename):
 		interval = 1
 		for linei in lines:
 			if linei.find('intervals [' + str(interval) + ']') != -1:
-				label = lines[countLines+3][10:]
+				# label = lines[countLines+3][10:]
+				label = lines[countLines+3][19:]
 				if label.find('SIL') != -1:
 					# Do nothing
 					pass
 				else:
-					xminInterval = lines[countLines+1][10:]
-					xmaxInterval = lines[countLines+2][10:]
+					# Uncomment these lines if spaces are converted to tabs
+					# xminInterval = lines[countLines+1][10:]
+					# xmaxInterval = lines[countLines+2][10:]
+					# Uncomment these lines if tabs are converted to spaces
+					xminInterval = lines[countLines+1][19:]
+					xmaxInterval = lines[countLines+2][19:]
 					phoneList.append(Phone(xminInterval, xmaxInterval, label))
 				interval = interval + 1	
 
@@ -120,7 +121,8 @@ def getDurationVec(_textgridFilename):
 	durations = [] # Size should be 25
 	currentUtterance = parseTextgrid(_textgridFilename)
 	# Time step
-	timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/26
+	# timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/26
+	timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/25
 	# print('Time step: ' + str(timeStep))
 	currentPhoneList = currentUtterance.phoneList
 	phoneIndex = 0
@@ -132,9 +134,15 @@ def getDurationVec(_textgridFilename):
 			isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or \
 			phoneIndex == (len(currentPhoneList) -1):
 				durations.append(0)
+				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label) + \
+				# 	', Duration: ' + str(durations[-1]))
+				# print(str(len(durations)))
 			else:
 				dur = float(currentPhoneList[phoneIndex].end)-float(currentPhoneList[phoneIndex].start)
 				durations.append(dur)
+				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label)  + \
+				# 	', Duration: ' + str(durations[-1]))
+				# print(str(len(durations)))
 
 		else:
 			phoneIndex += 1
@@ -143,9 +151,15 @@ def getDurationVec(_textgridFilename):
 			isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or\
 			phoneIndex == (len(currentPhoneList) -1):
 				durations.append(0)
+				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label) + \
+				# 	', Duration: ' + str(durations[-1]))
+				# print(str(len(durations)))
 			else:
 				dur = float(currentPhoneList[phoneIndex].end)-float(currentPhoneList[phoneIndex].start)
 				durations.append(dur)
+				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label)  + \
+				# 	', Duration: ' + str(durations[-1]))
+				# print(str(len(durations)))
 
 	# return (listOfNatures,durations)
 	return durations
@@ -154,7 +168,10 @@ def getNormDurationVec(_textgridFilename):
 	"""
 	This function normalises the durations over the duration of the whole utterance
 	"""
+	print(_textgridFilename)
 	currentUtterance = parseTextgrid(_textgridFilename)
+	# print('Start:' + currentUtterance.start + '\nEnd:' + currentUtterance.end)
+	# print('Number of phones:' + str(currentUtterance.nbIntervals))
 	uttDuration = float(currentUtterance.end) - float(currentUtterance.start)
 	rawDur = getDurationVec(_textgridFilename)
 	normDur = []
@@ -219,11 +236,14 @@ def writeNormTextData(_textFilename, _textgridList):
 			outfile.write('\n')
 
 def main():
-	ROOT = "C:\\Users\\QuyThao\\Documents\\Prosody analysis\\Tests_ERJ_TIMIT\\ERJ\\Alignment\\mono_align_words_full\\"
-	GRID_DIR = ROOT + "ERJ.TextGrid\\"
-	RES_FILE = ROOT + 'Results\\dur_erj_sampled.txt'
-	RES_FILE_NORM  = ROOT + 'Results\\durnorm_erj_sampled.txt'
+	ROOT = "C:\\Users\\QuyThao\\Documents\\Prosody analysis\\Tests_ERJ_TIMIT\\ERJ\\"
+	GRID_DIR = ROOT + "Alignment\\mono_align_words_full\\ERJ.TextGrid\\"
+	RES_FILE = ROOT + 'Alignment\\mono_align_words_full\\Results\\dur_handseg_910.txt'
+	RES_FILE_NORM  = ROOT + 'Alignment\\mono_align_words_full\\Results\\durnorm_handseg_910.txt'
 	textgridlist = glob.glob(GRID_DIR + '*.TextGrid')
+	# RES_FILE_NORM = 'test_print.txt'
+	# textgridlist = glob.glob('*.TextGrid')
+
 	# writeTextData(RES_FILE,textgridlist)
 	writeNormTextData(RES_FILE_NORM, textgridlist)
 
