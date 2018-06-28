@@ -15,3 +15,4 @@ wdist_iter100/
 
 # directories
 # **/
+__pycache__
