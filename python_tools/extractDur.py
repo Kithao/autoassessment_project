@@ -94,7 +94,7 @@ def parseTextgrid(_textgridFilename):
 def isVowel(_Phone):
 	# Vowel (Attention: il y a un espace à la fin de chaque label)
 	# Beware of 2-sized labels that are not vowels
-	if len(_Phone.label) > 4 \
+	if len(_Phone.label) > 5 \
 		and (_Phone.label.find('A') != -1 \
 		or _Phone.label.find('E') != -1 \
 		or _Phone.label.find('I') != -1 \
@@ -170,8 +170,6 @@ def getNormDurationVec(_textgridFilename):
 	"""
 	print(_textgridFilename)
 	currentUtterance = parseTextgrid(_textgridFilename)
-	# print('Start:' + currentUtterance.start + '\nEnd:' + currentUtterance.end)
-	# print('Number of phones:' + str(currentUtterance.nbIntervals))
 	uttDuration = float(currentUtterance.end) - float(currentUtterance.start)
 	rawDur = getDurationVec(_textgridFilename)
 	normDur = []
@@ -207,17 +205,6 @@ def writeTextData(_textFilename, _textgridList):
 	with open(_textFilename, 'a') as outfile:
 		for filei in _textgridList:
 			durations = getDurationVec(filei)
-			# lineToWrite = [filei[:-9]] + durations
-			# Delete substring correponding to ROOT
-			# index = 0
-			# length = len(_delete)
-			
-			# while filei.find(_delete) != -1:
-			# 	index = filei.find(_delete)
-			# 	# filename = filei[0:index] + filei[index+length]
-			# 	filei = filei[0:index] + filei[index+length]
-			# 	print(filei)
-			# # print(filei)
 			lineToWrite = [filei[:-9]] + durations
 			
 			for element in lineToWrite:
