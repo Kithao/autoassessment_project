@@ -10,6 +10,12 @@
 *.asv
 main.asv
 writeInExcel.asv
+*.mat
+comboDist.m
+durDist.m
+plotHelper.m
+wdurDist.m
+weightedDurDist.m
 plots/
 wdist_iter100/
 
