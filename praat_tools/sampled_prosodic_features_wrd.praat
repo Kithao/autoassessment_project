@@ -1,10 +1,11 @@
 # November 15th, 2017
 # Modified by TQT
 
-# This script is used to compute prosodic features (F0, intensity)
-# at 25 equally spaced sample points over the utterance 
-# of each file present in the specified directory
-# ATTENTION: WORD-LABELED UTTERANCES
+# This script is used to compute prosodic features (F0, intensity) at 25 equally spaced sampled points over an utterance
+# The locations of the audio files, their corresponding TextGrid files and the resulting text files have to be specified
+# The audio files and their corresponding TextGrid files have to be named accordingly 
+# The results for F0 and intensity features are separated into 2 independent text files
+# ATTENTION: This script has to be used for word-labeled TextGrid files
 
 form Get pitch intensity and duration from labeled segments in file
 	comment Directory of sound files. Be sure to include the final "/"
@@ -28,7 +29,6 @@ form Get pitch intensity and duration from labeled segments in file
 	comment Pitch analysis parameters
 	positive Pitch_time_step 0.01
 	positive Minimum_pitch_(Hz) 75
-	#positive Minimum_pitch_(Hz) 10
 	positive Maximum_pitch_(Hz) 300
 endform
 
@@ -106,10 +106,8 @@ for ifile to numberOfFiles
 				# Define the time step to sample 25 points
 				# (we want to ignore the values at the start and end)
 				sample_step = (end - start) / 26
-				# sample_step = (end - start) / 31
 
 				# Write result in pitch file
-				# resultline$ = "'soundname$' 'tab$' 'label$' 'tab$' 'duration_ms:0' 'tab$'"
 				resultline$ = "'soundname$' 'tab$' 'label$' 'tab$'"
 				fileappend "'resultsfile$'" 'resultline$'
 				
@@ -120,15 +118,10 @@ for ifile to numberOfFiles
 				# Pitch
 				select Pitch 'soundname$'
 				for ipitch to 25
-				# for ipitch to 30
 					pitch_time = ( ipitch * sample_step ) + start
-					f0 = Get value at time... pitch_time Hertz Linear
-					# f0_mid = Get value at time... midpoint Hertz Linear
-					# f0_mean = Get mean... start end Hertz					
+					f0 = Get value at time... pitch_time Hertz Linear		
 					pitchline$ = "'f0:1' 'tab$'"
 					fileappend "'resultsfile$'" 'pitchline$'
-					# Check the sample step and the pitch at each one of the 25 points
-					# appendInfoLine: "'sample_step' s, 'pitch_time' s : 'f0:1' Hz"
 				endfor
 				fileappend "'resultsfile$'" 'newline$'
 
@@ -141,10 +134,6 @@ for ifile to numberOfFiles
 					fileappend "'resultsfile_int$'" 'intensityline$'
 				endfor
 				fileappend "'resultsfile_int$'" 'newline$'
-					
-				
-				# resultline$ = "'soundname$' 'tab$' 'label$' 'tab$' 'duration_ms:0' 'tab$' 'f0_mid:1' 'tab$' 'f0_mean:1' 'tab$' 'intensity_max:1' 'tab$' 'intensity_mean:1' 'newline$'"
-				# fileappend "'resultsfile$'" 'resultline$'
 
 				select TextGrid 'soundname$'
 			endif

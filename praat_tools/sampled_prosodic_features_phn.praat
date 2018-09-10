@@ -1,10 +1,11 @@
 # January 23, 2017
 # Modified by TQT
 
-# This script is used to compute prosodic features (F0, intensity)
-# at 25 equally spaced sample points over the utterance 
-# of each file present in the specified directory
-# ATTENTION: PHONE-LABELED UTTERANCES
+# This script is used to compute prosodic features (F0, intensity) at 25 equally spaced sampled points over an utterance
+# The locations of the audio files, their corresponding TextGrid files and the resulting text files have to be specified
+# The audio files and their corresponding TextGrid files have to be named accordingly 
+# The results for F0 and intensity features are separated into 2 independent text files
+# ATTENTION: This script has to be used for phone-labeled TextGrid files
 
 form Get pitch intensity and duration from labeled segments in file
 	comment Directory of sound files. Be sure to include the final "/"
@@ -74,9 +75,6 @@ for ifile to numberOfFiles
 
 	gridfile$ = "'textGrid_directory$''soundname$'.TextGrid"
 	
-	# Check
-	#appendInfoLine: "File nb 'ifile', filename 'soundname$'"
-
 	if fileReadable (gridfile$)
 		Read from file... 'gridfile$'
 
@@ -116,7 +114,6 @@ for ifile to numberOfFiles
 		utt_dur = (end - start)
 
 		# Define time step to sample 25 points
-		# sample_step = utt_dur / 26
 		sample_step = utt_dur / 24 
 
 		nameline$ = "'soundname$' 'tab$'"
@@ -126,7 +123,6 @@ for ifile to numberOfFiles
 		# Pitch
 		select Pitch 'soundname$'
 		for ipitch to 25
-			# pitch_time = ( ipitch * sample_step ) + start
 			pitch_time = ( (ipitch - 1) * sample_step ) + start
 			f0 = Get value at time... pitch_time Hertz Linear
 			pitchline$ = "'f0:1' 'tab$'"
@@ -137,7 +133,6 @@ for ifile to numberOfFiles
 		# Intensity
 		select Intensity 'soundname$'
 		for iintensity to 25
-			# intensity_time =  ( iintensity * sample_step ) + start
 			intensity_time =  ( (iintensity - 1) * sample_step ) + start
 			intensity = Get value at time... intensity_time Cubic
 			intensityline$ = "'intensity:1' 'tab$'"
@@ -145,7 +140,6 @@ for ifile to numberOfFiles
 		endfor
 		fileappend "'resultsfile_int$'" 'newline$'
 
-		#select TextGrid 'soundname$'
 	endif
 	select TextGrid 'soundname$'
 	plus Pitch 'soundname$'
