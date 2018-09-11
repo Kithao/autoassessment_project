@@ -33,7 +33,11 @@ NAT_TO_ERJ = {
 
 def extractVowelDur(_textgridFilename):
 	"""
-	This function extracts the 
+	This function extracts the durations of the vowels in a word
+	Input
+		_textgridFilename 	filename of the textgrid to read
+	Output
+		vowelDur 	list of viwel durations in a word
 	"""
 	currUtterance = utils.parseTextgrid(_textgridFilename)
 	currPhoneList = currUtterance.phoneList
@@ -56,6 +60,13 @@ def ratioOrder(_nbOfWords, _path):
 	1 : last/first - 0 : first/last
 	Note: filenames have to be indexed by numerical value
 	The order is decided depending on the mean value of the ratio for all the native spks
+
+	Input
+		_nbOfWords 	number of words 
+		_path 		directory where the textgrid files are located
+	Output
+		wordToOrder dictionary mapping native word IDs to a vector of 0 and 1 
+					corresponding to the order of ratio computation for each pair in the word
 	"""
 	def getNbVowels(_utt):
 		i = 0
@@ -66,7 +77,6 @@ def ratioOrder(_nbOfWords, _path):
 				pass
 			else:
 				i = i + 1
-				# print(phone.label)
 		return i
 
 	wordToOrder = {}
@@ -75,26 +85,20 @@ def ratioOrder(_nbOfWords, _path):
 			word_id = '_0' + str(i)
 		else:
 			word_id = '_' + str(i)
-		# print('First word id: ' + word_id)
 		fileList = glob.glob(_path + '*' + word_id + '*.TextGrid')
-		# print('First file: ' + fileList[0])
 		orderVec = [] # Order with which to calculate the ratios
 		# Determine the number of pairs in the word
 		nbPairs = getNbVowels(utils.parseTextgrid(fileList[0])) - 1
-		# print('Nb of pairs : ' + str(nbPairs))
 		nbSpks = len(fileList)
-		# print('Nb of spks : ' + str(nbSpks))
 		# Matrix of ratios for all speakers
 		allSpkRatios = [[0 for x in range(nbPairs)] for y in range(nbSpks)] 
 		# Extract ratios for all speakers
 		# phone(i+1)/phone(i)
 		for spk in range(nbSpks):
 			vowelDur = extractVowelDur(fileList[spk])
-			# print('Word '  + word_id + ' Dur ' + str(vowelDur))
 			for k in range(nbPairs):
 				ratio = vowelDur[k+1]/vowelDur[k]
 				allSpkRatios[spk][k] = ratio
-		# print(allSpkRatios)
 
 		# Compute mean ratio of all speakers for each pair
 		for pair in range(nbPairs):
@@ -107,8 +111,6 @@ def ratioOrder(_nbOfWords, _path):
 			else:
 				orderVec.append(0)
 
-		# print(orderVec)
-
 		wordToOrder[word_id] = orderVec
 
 	return wordToOrder	
@@ -116,6 +118,13 @@ def ratioOrder(_nbOfWords, _path):
 def convertNatToL2(_wordToOrder,_natToL2):
 	"""
 	Converts the keys of wordToOrder dictionary to the word ids of L2 utterances
+	Input
+		_wordToOrder 	dictionary mapping native word IDs to the vector of 0s and 1s
+						indicating the order of ratio computation
+		_natToL2 		dictionary mapping native word IDs to their corresponding ERJ word IDs
+	Output
+		converted 		dictionary mapping ERJ word IDs to the vector of 0s and 1s
+						indicating the order of ratio computation
 	"""
 	converted = {}
 	for key in _natToL2:
@@ -127,6 +136,11 @@ def convertNatToL2(_wordToOrder,_natToL2):
 def computePairRatio(_textgridFilename,_orderVec):
 	"""
 	Computes the ratio between consecutive vowels according to the order vec
+	Input
+		_textgridFilename 	filename of the textgrid to process
+		_orderVec 			vector of 0s and 1s giving the order of ratio computation
+	Output
+		pairRatio 			list of duration ratios of the non native utterance
 	"""
 	pairRatio = []
 	vowelDur = extractVowelDur(_textgridFilename)
@@ -141,6 +155,10 @@ def computePairRatio(_textgridFilename,_orderVec):
 def writeRatioText(_textFilename, _textgridList,_orderVec):
 	"""
 	This function writes ratio info for each file into a text file
+	Input
+		_textFilename 	text file where duration ratios have to be written
+		_textgridList 	list of textgrid files to parse
+		_orderVec 		vector giving the order of ratio computation for the corresponding word
 	"""
 	with open(_textFilename, 'a') as outfile:
 		for filei in _textgridList:
