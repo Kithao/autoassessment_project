@@ -10,9 +10,15 @@
 
 from __future__ import with_statement
 
-import os, glob
-import extractDur
+import os
+import glob
 
+import utils
+from utterance import Utterance
+from phone import Phone
+
+
+# Dictionary mapping native word IDs (from _01 to _36) to corresponding ERJ word ID (W*_***)
 NAT_TO_ERJ = {
 	'_01' : ['W5_189','W1_181'], '_02' : ['W5_190','W1_182'], '_03' : ['W5_191','W1_183'], '_04' : ['W5_192','W1_184'],
 	'_05' : ['W2_181','W1_185'], '_06' : ['W2_182','W1_186'], '_07' : ['W2_183','W1_187'], '_08' : ['W2_184','W1_188'],
@@ -26,12 +32,15 @@ NAT_TO_ERJ = {
 	}
 
 def extractVowelDur(_textgridFilename):
-	currUtterance = extractDur.parseTextgrid(_textgridFilename)
+	"""
+	This function extracts the 
+	"""
+	currUtterance = utils.parseTextgrid(_textgridFilename)
 	currPhoneList = currUtterance.phoneList
 	vowelDur = []
 	for phonei in currPhoneList:
-		if extractDur.isVowel(phonei).find('-1') != -1 or \
-		extractDur.isVowel(phonei).find('0') != -1 or \
+		if utils.isVowel(phonei).find('-1') != -1 or \
+		utils.isVowel(phonei).find('0') != -1 or \
 		phonei.end == currUtterance.end:
 			pass
 		else:
@@ -44,14 +53,15 @@ def ratioOrder(_nbOfWords, _path):
 	This function returns a dictionary of the size of _nbOfWords
 	{ 'word_id1' : [x x], 'word_id2' : [x x]} where the key value represents the
 	order in which to calculate the vowel ratio for each word
+	1 : last/first - 0 : first/last
 	Note: filenames have to be indexed by numerical value
 	The order is decided depending on the mean value of the ratio for all the native spks
 	"""
 	def getNbVowels(_utt):
 		i = 0
 		for phone in _utt.phoneList:
-			if extractDur.isVowel(phone).find('-1') != -1 or \
-			extractDur.isVowel(phone).find('0') != -1 or \
+			if utils.isVowel(phone).find('-1') != -1 or \
+			utils.isVowel(phone).find('0') != -1 or \
 			phone.end == _utt.end:
 				pass
 			else:
@@ -70,7 +80,7 @@ def ratioOrder(_nbOfWords, _path):
 		# print('First file: ' + fileList[0])
 		orderVec = [] # Order with which to calculate the ratios
 		# Determine the number of pairs in the word
-		nbPairs = getNbVowels(extractDur.parseTextgrid(fileList[0])) - 1
+		nbPairs = getNbVowels(utils.parseTextgrid(fileList[0])) - 1
 		# print('Nb of pairs : ' + str(nbPairs))
 		nbSpks = len(fileList)
 		# print('Nb of spks : ' + str(nbSpks))

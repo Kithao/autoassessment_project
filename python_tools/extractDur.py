@@ -1,8 +1,9 @@
 #!/usr/bin/python
 #
 # 13 June 2018
-# This script generates a text file with 25 durations features
-# Each TextGrid ifle is parsed and vowel durations are extracted
+# This script generates a text file with 25 durations features (25 sampled points)
+# The extracted durations correspond to the duration of the phone at the i-th sampled point 
+# Each TextGrid file is parsed and vowel durations are extracted
 # 
 # Author: TRUONG Quy Thao
 #
@@ -10,166 +11,64 @@
 
 from __future__ import with_statement
 
-import os, glob
+import os
+import glob
 
-class Phone(object):
-	"""
-	Definition of a class Phone containing start/end times and a label
-	"""
+import utils
+from phone import Phone
+from utterance import Utterance
 
-	def __init__(self, _start, _end, _label):
-		super(Phone, self).__init__()
-		self.start = _start
-		self.end = _end
-		self.label = _label
-
-
-class Utterance(object):
-	"""
-	Definition of a class Utterance 
-	"""
-	def __init__(self, _phoneList):
-		"""
-		Only the nb of intervals and the phone list are known 
-		"""
-		super(Utterance, self).__init__()
-		self.start = 0 
-		self.end = 0
-		self.nbIntervals = len(_phoneList)
-		self.phoneList = _phoneList
-
-	def setStartEnd(self):
-		# Set start of audio (timestamp of first non silence phone)
-		if (self.phoneList[0].label).find('SIL') != -1:
-			self.start = self.phoneList[1].start
-		else:
-			self.start = self.phoneList[0].start
-
-		# Set end of audio
-		if (self.phoneList[-1].label).find('SIL') != -1:
-			self.end = self.phoneList[-1].start
-		else:
-			self.end = self.phoneList[-1].end
-
-
-def parseTextgrid(_textgridFilename):
-	"""
-	This function parses a textgrid and returns a Textgrid object
-	containing the start, end, and phone list of each 
-	"""
-
-	phoneList = [] # List of phones found in the textGrid
-	with open(_textgridFilename, 'r') as infile:
-		lines = infile.readlines()
-		#nbIntervals = lines[13][20:] # Number of intervals (sil and non sil)
-		xmax = lines[4][7:] # end of audio
-
-		# Store all the info on the phones in a list
-		countLines = 0
-		interval = 1
-		for linei in lines:
-			if linei.find('intervals [' + str(interval) + ']') != -1:
-				# label = lines[countLines+3][10:]
-				label = lines[countLines+3][19:]
-				if label.find('SIL') != -1:
-					# Do nothing
-					pass
-				else:
-					# Uncomment these lines if spaces are converted to tabs
-					# xminInterval = lines[countLines+1][10:]
-					# xmaxInterval = lines[countLines+2][10:]
-					# Uncomment these lines if tabs are converted to spaces
-					xminInterval = lines[countLines+1][19:]
-					xmaxInterval = lines[countLines+2][19:]
-					phoneList.append(Phone(xminInterval, xmaxInterval, label))
-				interval = interval + 1	
-
-			countLines = countLines + 1
-
-	currentUtterance = Utterance(phoneList)
-	currentUtterance.setStartEnd()
-
-	return currentUtterance
-
-def isVowel(_Phone):
-	# Vowel (Attention: il y a un espace à la fin de chaque label)
-	# Beware of 2-sized labels that are not vowels
-	if len(_Phone.label) > 5 \
-		and (_Phone.label.find('A') != -1 \
-		or _Phone.label.find('E') != -1 \
-		or _Phone.label.find('I') != -1 \
-		or _Phone.label.find('O') != -1 \
-		or _Phone.label.find('U') != -1): 
-		return "1"
-	# Insertion
-	elif _Phone.label.find('A') != -1 \
-		or _Phone.label.find('E') != -1 \
-		or _Phone.label.find('I') != -1 \
-		or _Phone.label.find('O') != -1 \
-		or _Phone.label.find('U') != -1:
-		return "-1"
-	# Consonant
-	else:
-		return "0"
 
 def getDurationVec(_textgridFilename):
 	"""
 	This function returns the list of 25 durations according to the
 	phone nature of the current sample point (vowel, consonant, insertion)
+	Input
+		_textgridFilename 	filename of the textgrid file to parse
+	Output
+		durations 			list of 25 durations 
 	"""
 	listOfNatures = [] # Size should be 25
 	durations = [] # Size should be 25
-	currentUtterance = parseTextgrid(_textgridFilename)
+	currentUtterance = utils.parseTextgrid(_textgridFilename)
 	# Time step
-	# timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/26
-	timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/25
-	# print('Time step: ' + str(timeStep))
+	nbPoints = 25
+	timeStep = (float(currentUtterance.end) - float(currentUtterance.start))/nbPoints
 	currentPhoneList = currentUtterance.phoneList
 	phoneIndex = 0
-	for i in range(1,26):
+	for i in range(1,nbPoints+1):
 		mid = (timeStep * i - timeStep * (i - 1))/2
 		if (float(currentPhoneList[phoneIndex].end)-float(currentPhoneList[0].start) > (timeStep*(i-1) + mid)):
-			listOfNatures.append(isVowel(currentPhoneList[phoneIndex]))
-			if isVowel(currentPhoneList[phoneIndex]).find('0') != -1 or \
-			isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or \
+			listOfNatures.append(utils.isVowel(currentPhoneList[phoneIndex]))
+			if utils.isVowel(currentPhoneList[phoneIndex]).find('0') != -1 or \
+			utils.isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or \
 			phoneIndex == (len(currentPhoneList) -1):
 				durations.append(0)
-				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label) + \
-				# 	', Duration: ' + str(durations[-1]))
-				# print(str(len(durations)))
 			else:
 				dur = float(currentPhoneList[phoneIndex].end)-float(currentPhoneList[phoneIndex].start)
 				durations.append(dur)
-				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label)  + \
-				# 	', Duration: ' + str(durations[-1]))
-				# print(str(len(durations)))
-
 		else:
 			phoneIndex += 1
-			listOfNatures.append(isVowel(currentPhoneList[phoneIndex]))
-			if isVowel(currentPhoneList[phoneIndex]).find('0') != -1 or\
-			isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or\
+			listOfNatures.append(utils.isVowel(currentPhoneList[phoneIndex]))
+			if utils.isVowel(currentPhoneList[phoneIndex]).find('0') != -1 or\
+			utils.isVowel(currentPhoneList[phoneIndex]).find('-1') != -1 or\
 			phoneIndex == (len(currentPhoneList) -1):
 				durations.append(0)
-				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label) + \
-				# 	', Duration: ' + str(durations[-1]))
-				# print(str(len(durations)))
 			else:
 				dur = float(currentPhoneList[phoneIndex].end)-float(currentPhoneList[phoneIndex].start)
 				durations.append(dur)
-				# print('Phone index: %.0f, Label: ' %phoneIndex + str(currentPhoneList[phoneIndex].label)  + \
-				# 	', Duration: ' + str(durations[-1]))
-				# print(str(len(durations)))
-
-	# return (listOfNatures,durations)
 	return durations
 
 def getNormDurationVec(_textgridFilename):
 	"""
-	This function normalises the durations over the duration of the whole utterance
+	This function normalises the phones durations over the duration of the whole utterance
+	Input:
+		_textgridFilename 	filename of the textgrid file to parse
+	Output
+		normDur 			list of 25 normalised durations
 	"""
-	print(_textgridFilename)
-	currentUtterance = parseTextgrid(_textgridFilename)
+	# print(_textgridFilename)
+	currentUtterance = utils.parseTextgrid(_textgridFilename)
 	uttDuration = float(currentUtterance.end) - float(currentUtterance.start)
 	rawDur = getDurationVec(_textgridFilename)
 	normDur = []
@@ -179,10 +78,13 @@ def getNormDurationVec(_textgridFilename):
 
 	return normDur
 
+
 def writeTextHeader(_textFilename):
 	"""
-	This functin writes the header of the text file containing 
-	the duration of the 25 sample points 
+	This function writes the header of the text file containing 
+	the duration of the 25 sampled points 
+	Input
+		_textFilename 	filename of the desired text file
 	"""
 	header = ["'Filename'\t"]
 
@@ -197,8 +99,10 @@ def writeTextHeader(_textFilename):
 def writeTextData(_textFilename, _textgridList):
 # def writeTextData(_textFilename, _textgridList, _delete):
 	"""
-	_textFilename: text file in which to write the data
-	_textgridList: list of all the textgrid to process
+	This function writes textgrid file data into text files
+	Input
+		_textFilename 	 text file in which to write the data
+		_textgridList 	 list of all the textgrid to process
 	"""
 	writeTextHeader(_textFilename)
 
@@ -212,6 +116,12 @@ def writeTextData(_textFilename, _textgridList):
 			outfile.write("\n")
 
 def writeNormTextData(_textFilename, _textgridList):
+	"""
+	This function writes normalised durations into text files
+	Input
+		_textFilename 	text file in which to write the data
+		_textgridList 	list of textgrid files to process
+	"""
 	writeTextHeader(_textFilename)
 
 	with open(_textFilename, 'a') as outfile:

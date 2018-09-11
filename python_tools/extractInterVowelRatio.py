@@ -10,9 +10,12 @@
 
 from __future__ import with_statement
 
-import os, glob
-import extractDur
+import os 
+import glob
 
+import utils
+from utterance import Utterance
+from phone import Phone
 
 def getInterVowelRatio(_textgridFilename):
 	"""
@@ -21,20 +24,14 @@ def getInterVowelRatio(_textgridFilename):
 	"""
 	vowelRatio = []
 	vowelDur = []
-	currUtterance = extractDur.parseTextgrid(_textgridFilename)
+	currUtterance = utils.parseTextgrid(_textgridFilename)
 	currPhoneList = currUtterance.phoneList
 	for phonei in currPhoneList:
-		if extractDur.isVowel(phonei).find('-1') != -1 or \
-		extractDur.isVowel(phonei).find('0') != -1 or \
+		if utils.isVowel(phonei).find('-1') != -1 or \
+		utils.isVowel(phonei).find('0') != -1 or \
 		phonei.end == currUtterance.end:
-			# print('Pass - nature of phone : ' + extractDur.isVowel(phonei))
-			# print('Phone : ' + phonei.label)
-			# print('Phone length : ' + str(len(phonei.label)))
 			pass
 		else:
-			# print('Not pass - nature of phone : ' + extractDur.isVowel(phonei))
-			# print('Phone : ' + phonei.label)			
-			# print('Phone length : ' + str(len(phonei.label)))
 			dur = float(phonei.end) - float(phonei.start)
 			vowelDur.append(dur)
 
@@ -52,11 +49,11 @@ def getConsecutiveVowelRatio(_textgridFilename):
 	"""
 	vowelRatio = []
 	vowelDur = []
-	currUtterance = extractDur.parseTextgrid(_textgridFilename)
+	currUtterance = utils.parseTextgrid(_textgridFilename)
 	currPhoneList = currUtterance.phoneList
 	for phonei in currPhoneList:
-		if extractDur.isVowel(phonei).find('-1') != -1 or \
-		extractDur.isVowel(phonei).find('0') != -1 or \
+		if utils.isVowel(phonei).find('-1') != -1 or \
+		utils.isVowel(phonei).find('0') != -1 or \
 		phonei.end == currUtterance.end:
 			pass
 		else:
@@ -68,7 +65,6 @@ def getConsecutiveVowelRatio(_textgridFilename):
 		vowelRatio.append(ratio)
 
 	return vowelRatio
-
 
 def writeRatioText(_textFilename, _textgridList):
 	"""
