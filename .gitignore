@@ -11,6 +11,7 @@
 main.asv
 writeInExcel.asv
 *.mat
+~*.m
 comboDist.m
 durDist.m
 plotHelper.m
