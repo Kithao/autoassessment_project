@@ -1,3 +1,14 @@
+% This script z-normalises raw data at the speaker level
+% Inputs:
+%  filename     excel file
+%  worksheet    sheet name
+%  cell_range   boundaries of the cells to read in the excel file
+% Output:
+%  complete_z   z-normalised data
+% Format of the excel sheet
+% <filename> <value_1> ... <value_25>
+%     |          |_____________|
+%  spk_list            num
 function complete_z = zNormSpk(filename, worksheet, cell_range)
 complete_z = []; % matrix of all values
 % num : numerical values in the xls file
@@ -11,21 +22,21 @@ same_spk = 1;
 spk_list = char(spk_list);
 
 for i = 1:(length(spk_list)-1)
-    % Check if 10 first characters are the same
+    % Check if first characters are the same
+    % 10 characters for native
+    % 7 characters for erj
     % (i.e. same speaker)
-    if isequal(spk_list(i+1,1:7), spk_list(i,1:7))
+    if isequal(spk_list(i+1,1:10), spk_list(i,1:10))
         same_spk = same_spk+1;
         if i == (length(spk_list)-1)
             if nb_spk == 1
+                first_index = i-same_spk+1;
+                last_index = i;
+            else
                 first_index = i-same_spk+2;
                 last_index = i+1;
-            else
-                first_index = i-same_spk+3;
-                last_index = i+2;
             end
-            data_range = ['B' int2str(first_index) ':' 'Z' int2str(last_index)];
-            % Read data for one speaker
-            data = xlsread(filename, worksheet, data_range);
+            data = num(first_index:last_index,:);
             % Z normalise values
             [mean,std] = omitZeroStats(data);
             z_data = zNorm(data,mean,std);
@@ -36,11 +47,15 @@ for i = 1:(length(spk_list)-1)
         % Once a new speaker is detected, z norm
         % values on the previous speaker and 
         % reallocate same spk vector to new speaker
-        first_index = i-same_spk+2;
-        last_index = i+1;
-        data_range = ['B' int2str(first_index) ':' 'Z' int2str(last_index)];
+        if same_spk == 1
+            first_index = i;
+            last_index = i;
+        else
+            first_index = i-same_spk+1;
+            last_index = i;
+        end
         % Read data for one speaker
-        data = xlsread(filename, worksheet, data_range);
+        data = num(first_index:last_index,:);
         % Z normalise values
         [mean,std] = omitZeroStats(data);
         z_data = zNorm(data,mean,std);
