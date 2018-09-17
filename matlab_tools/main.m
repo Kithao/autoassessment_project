@@ -182,6 +182,8 @@ iter_combo = tanh(iter_combo/n_iter);
 
 end
 
+% This function converts the weighted distances into a score 
+% between min_score and max_score 
 function scores = convertRange(dist,min_score,max_score)
 scores = zeros(size(dist,1),1);
 min_dist = -max(dist);
@@ -192,6 +194,8 @@ for i = 1:size(dist,1)
 end
 end
 
+% This function converts the ratio product into a 1-3-5 score
+% depending on the average native ratio product
 function durScore = compareToMean(product,meanNative)
 if product < 1
     durScore = 1;
@@ -202,7 +206,8 @@ else
 end
 end
 
-% Convert product of ratios into scores on a linear scale
+% This function linearly interpolates the products into a prosodic score
+% from min_score to max_score
 function converted = linConvert(product_scores,min_score,max_score) 
 converted = zeros(size(product_scores,1),1);
 min_product = min(product_scores);
@@ -213,6 +218,8 @@ for i = 1:size(product_scores,1)
 end
 end
 
+% This function compares the ratio product of non-native speakers
+% to the average native product by computing their ratio
 function converted = ratioToMean(products,mean_nat)
 converted = zeros(size(products,1),1);
 % Compute product/mean 
