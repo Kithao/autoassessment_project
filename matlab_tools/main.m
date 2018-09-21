@@ -10,8 +10,8 @@
 %   RES_combo...      subj-obj corr using avg of F0-int-ratio 
 %   RES_durcontrol... subj-obj corr using ratio score only
 %   iter_*            overall score over words and iterations
-function [RES_combo_perword, ...
-          iter_combo] = main(ratio_data,proso_data)
+function [corr_perword, ...
+          corr_overall] = main(ratio_data,proso_data)
 
 n_iter = 100; % Nb of total iterations
 soft_k = 1;   % k for the sigmoid normalisation
@@ -19,11 +19,11 @@ max_kmeans = 100; % Nb of iterations in k-means
 
 % Variables (type real) containing the subj-obj correlation
 % after n_iter iterations over all the words
-iter_combo = 0;
+corr_overall = 0;
 
 % Column vector containing the subj-obj correlation 
 % for each word after n_iter iterations
-RES_combo_perword = zeros(size(ratio_data,1),1);
+corr_perword = zeros(size(ratio_data,1),1);
 
 % Iterate over n_iter iterations
 for it = 1:n_iter
@@ -130,7 +130,7 @@ for it = 1:n_iter
     
     %%% "Average" the correlations over the n_iter iterations
     %%% using Fisher's method
-    RES_combo_perword = RES_combo_perword + ...
+    corr_perword = corr_perword + ...
         atanh(combo_perword);
     
     %%% Subj-obj scores over all the words for 1 iteration
@@ -150,13 +150,13 @@ for it = 1:n_iter
     final_combo = tanh(final_combo/size(ratio_data,1));
     
     %%% Average over the iterations using Fisher's method
-    iter_combo = iter_combo + ...
+    corr_overall = corr_overall + ...
         atanh(final_combo);
 end
 
-RES_combo_perword = tanh(RES_combo_perword/n_iter);
+corr_perword = tanh(corr_perword/n_iter);
 
-iter_combo = tanh(iter_combo/n_iter);
+corr_overall = tanh(corr_overall/n_iter);
 
 end
 
