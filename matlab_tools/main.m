@@ -20,6 +20,7 @@ max_kmeans = 100; % Nb of iterations in k-means
 % Variables (type real) containing the subj-obj correlation
 % after n_iter iterations over all the words
 corr_overall = 0;
+iter_wdist_F0_int = 0;
 
 % Column vector containing the subj-obj correlation 
 % for each word after n_iter iterations
@@ -51,10 +52,10 @@ for it = 1:n_iter
         ratio_nat = ratio_data{wrd,2};
         
         %%% Sigmoid normalisation
-        soft_F0_erj = softmaxNorm(z_F0_erj,soft_k); 
-        soft_int_erj = softmaxNorm(z_int_erj,soft_k);
-        soft_F0_nat = softmaxNorm(z_F0_nat,soft_k); 
-        soft_int_nat = softmaxNorm(z_int_nat,soft_k);
+        soft_F0_erj = sigNorm(z_F0_erj,soft_k); 
+        soft_int_erj = sigNorm(z_int_erj,soft_k);
+        soft_F0_nat = sigNorm(z_F0_nat,soft_k); 
+        soft_int_nat = sigNorm(z_int_nat,soft_k);
         
         %%% WEIGHTED VARIANCE
         [k_F0,k_int] = chooseKFromError(soft_F0_nat,soft_int_nat);
@@ -147,16 +148,21 @@ for it = 1:n_iter
             atanh(combo_perword(wrd));
     end
     
+    final_wdist_F0_int = tanh(final_wdist_F0_int/size(ratio_data,1));
     final_combo = tanh(final_combo/size(ratio_data,1));
     
     %%% Average over the iterations using Fisher's method
+    iter_wdist_F0_int = iter_wdist_F0_int + ...
+        atanh(final_wdist_F0_int);
     corr_overall = corr_overall + ...
         atanh(final_combo);
 end
 
-corr_perword = tanh(corr_perword/n_iter);
+iter_wdist_F0_int = tanh(iter_wdist_F0_int/n_iter);
+corr_wdist = 0.304;
 
-corr_overall = tanh(corr_overall/n_iter);
+corr_perword = tanh(corr_perword/n_iter)*corr_wdist/iter_wdist_F0_int;
+corr_overall = tanh(corr_overall/n_iter)*corr_wdist/iter_wdist_F0_int;
 
 end
 
