@@ -9,6 +9,9 @@
 % <filename> <value_1> ... <value_25>
 %     |          |_____________|
 %  spk_list            num
+% Note: the first column <filename> is sorted by alphabetical
+%       order so that different utterances of the same speaker
+%       are grouped together
 function complete_z = zNormSpk(filename, worksheet, cell_range)
 complete_z = []; % matrix of all values
 % num : numerical values in the xls file

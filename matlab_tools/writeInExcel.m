@@ -46,11 +46,7 @@ for i = 1:length(wordlist)
 %     xlswrite(outfile,word_data_complete,word,'AZ2');  
     % For label
 %     xlswrite(outfile,word_data_complete,word,'BY2');    
-    % For vowel ratios
-%     xlswrite(outfile,word_data_complete,word,'A30');
-    % For consecutive vowel ratios
-%     xlswrite(outfile,word_data_complete,word,'A60');
-    % For duration control
-    xlswrite(outfile,word_data_complete,word,'M60');
+    % For duration ratios
+    xlswrite(outfile,word_data_complete,word,'A35');
 end
 end
