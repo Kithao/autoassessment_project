@@ -10,12 +10,8 @@
 %   RES_combo...      subj-obj corr using avg of F0-int-ratio 
 %   RES_durcontrol... subj-obj corr using ratio score only
 %   iter_*            overall score over words and iterations
-function [RES_wdist_F0_int_perword, ...
-          RES_combo_perword, ...
-          RES_durcontrol_perword, ...
-          iter_wdist_F0_int, ...
-          iter_combo, ...
-          iter_durcontrol] = main(ratio_data,all_data)
+function [RES_combo_perword, ...
+          iter_combo] = main(ratio_data,proso_data)
 
 n_iter = 100; % Nb of total iterations
 soft_k = 1;   % k for the sigmoid normalisation
@@ -23,14 +19,10 @@ max_kmeans = 100; % Nb of iterations in k-means
 
 % Variables (type real) containing the subj-obj correlation
 % after n_iter iterations over all the words
-iter_wdist_F0_int = 0;
-iter_durcontrol = 0;
 iter_combo = 0;
 
 % Column vector containing the subj-obj correlation 
 % for each word after n_iter iterations
-RES_wdist_F0_int_perword = zeros(size(ratio_data,1),1);
-RES_durcontrol_perword = zeros(size(ratio_data,1),1);
 RES_combo_perword = zeros(size(ratio_data,1),1);
 
 % Iterate over n_iter iterations
@@ -49,10 +41,10 @@ for it = 1:n_iter
         %%% Initialise data
         % Prosodic data read from the cell of data
         % given in parameter
-        z_F0_erj = all_data{wrd,1}; z_int_erj = all_data{wrd,2};
-        z_F0_nat = all_data{wrd,4}; z_int_nat = all_data{wrd,5};
+        z_F0_erj = proso_data{wrd,1}; z_int_erj = proso_data{wrd,2};
+        z_F0_nat = proso_data{wrd,3}; z_int_nat = proso_data{wrd,4};
         % Label (prosodic score given by raters)
-        label = all_data{wrd,7};
+        label = proso_data{wrd,5};
         % Vowel duration ratio data read from the cell 
         % of data given in parameter
         ratio_erj = ratio_data{wrd,1};
@@ -138,10 +130,6 @@ for it = 1:n_iter
     
     %%% "Average" the correlations over the n_iter iterations
     %%% using Fisher's method
-    RES_wdist_F0_int_perword = RES_wdist_F0_int_perword + ...
-        atanh(wdist_F0_int_perword);
-    RES_durcontrol_perword = RES_durcontrol_perword + ...
-        atanh(durcontrol_perword);
     RES_combo_perword = RES_combo_perword + ...
         atanh(combo_perword);
     
@@ -159,25 +147,15 @@ for it = 1:n_iter
             atanh(combo_perword(wrd));
     end
     
-    final_wdist_F0_int = tanh(final_wdist_F0_int/size(ratio_data,1));
-    final_durcontrol = tanh(final_durcontrol/size(ratio_data,1));
     final_combo = tanh(final_combo/size(ratio_data,1));
     
     %%% Average over the iterations using Fisher's method
-    iter_wdist_F0_int = iter_wdist_F0_int + ...
-        atanh(final_wdist_F0_int);
-    iter_durcontrol = iter_durcontrol + ...
-        atanh(final_durcontrol); 
     iter_combo = iter_combo + ...
         atanh(final_combo);
 end
 
-RES_wdist_F0_int_perword = tanh(RES_wdist_F0_int_perword/n_iter);
-RES_durcontrol_perword = tanh(RES_durcontrol_perword/n_iter);
 RES_combo_perword = tanh(RES_combo_perword/n_iter);
 
-iter_wdist_F0_int = tanh(iter_wdist_F0_int/n_iter);
-iter_durcontrol = tanh(iter_durcontrol/n_iter);
 iter_combo = tanh(iter_combo/n_iter);
 
 end
