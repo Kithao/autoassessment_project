@@ -111,6 +111,10 @@ def ratioOrder(_nbOfWords, _path):
 			else:
 				orderVec.append(0)
 
+		##### TO DO: instead of calculating the average ratio among native speakers,
+		##### determine the order of ratio calculation by keeping the order giving
+		##### the biggest number of ratios greater than 1
+
 		wordToOrder[word_id] = orderVec
 
 	return wordToOrder	
@@ -170,15 +174,22 @@ def writeRatioText(_textFilename, _textgridList,_orderVec):
 			outfile.write('\n')
 
 def main():
-	# Verify the dictionaries
 	ROOT = 'C:\\Users\\QuyThao\\Documents\\Prosody analysis\\Tests_ERJ_TIMIT\\ERJ\\'
+
+	# Native TextGrid files
 	GRID_DIR_NAT = ROOT + 'Native\\Alignment\\mono_ali_native_newwords\\TextGrid\\'
+	# Native result file
 	RES_FILE_NAT = ROOT + 'Native\\Alignment\\mono_ali_native_newwords\\Results\\durationcontrol_native.txt'
+
+	# Non-native TextGrid files
 	GRID_DIR_ERJ = ROOT + 'Alignment\\mono_align_words_full\\ERJ.TextGrid\\'
+	# Non-native result file
 	RES_FILE_ERJ = ROOT + 'Alignment\\mono_align_words_full\\Results\\durationcontrol_erj.txt'
+
 	# textgridList = glob.glob(GRID_DIR + '*.TextGrid')
 
-	wordToOrder = ratioOrder(36,GRID_DIR_NAT)
+	nbWords = 36
+	wordToOrder = ratioOrder(nbWords,GRID_DIR_NAT)
 	wordToOrder_L2 = convertNatToL2(wordToOrder,NAT_TO_ERJ)
 
 	# Native
